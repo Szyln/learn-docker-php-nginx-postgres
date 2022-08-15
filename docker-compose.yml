@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - '8000:80' # 網址輸入 localhost:8000 使用，<host port>:<container port>
+    depends_on:
+      - app # 先執行 app 才會執行 web
+    volumes:
+      - ./docker/web/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html # 根目錄下的檔案都會放進去
+  app:
+    build: ./docker/php # 如果有更改要重新 build use `docker-compose build` or `docker-compose up --build`
+    volumes:
+      - .:/var/www/html
+
+
+  # docker exec postgres bash 可以進去 container，使用資料庫
+  # psql -d postgres -U user; 使用 user 進入
+  # \l： 查看資料庫列表
+  postgres:
+    image: postgres:latest
+    restart: always # 除手動關閉外，container 被關閉時會自動開啟
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGPASSWORD: password123
+      POSTGRES_DB: sample
+      # TZ: "Asia/Taiwan"
+    ports:
+      - 5432:5432 # 使用 pgadmin 管理
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4 # 這是 pgadmin 提供的 image
+    restart: always
+    ports:
+      - 81:80 # localhost:81 可進入頁面，要等一下子
+    environment:
+      PGADMIN_DEFAULT_EMAIL: szyen.lin@gmail.com # localhost:81 用這個帳密登入
+      PGADMIN_DEFAULT_PASSWORD: password
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres # postgres 執行後才會執行這個 container
+
+volumes:
+  postgres:
+  pgadmin:
