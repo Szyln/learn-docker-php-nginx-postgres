@@ -14,3 +14,6 @@
 > 如果 `dockerfile` 有更新，需要重 build，輸入 `docker-compose build` or `docker-compose up --build`
 
 
+## 從 container 外拜訪
+- `localhost:8000`: nginx 代理，連到 index
+- `localhost:81`：pgAdmin 連到 database
